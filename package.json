@@ -1,0 +1,14 @@
+{
+  "author": "Alexander N. Wilson <arexkun11@gmail.com>",
+  "name": "facade",
+  "description": "Modify XML snippets on the server-side",
+  "version": "0.0.0",
+  "repository": {
+    "url": ""
+  },
+  "engines": {
+    "node": "~0.5.9 || 0.5.9-pre"
+  },
+  "dependencies": {},
+  "devDependencies": {}
+}
