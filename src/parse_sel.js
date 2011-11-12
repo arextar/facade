@@ -225,6 +225,9 @@ var pos = {
    }
    
    var matches = module.exports = function(elem, sel){
+      
+      if(!sel.length) sel = [sel];
+      
     return elem&&sel.some(function(sel){
         if(
            (sel.t && sel.t !== "*" && elem.tag.toUpperCase() !== sel.t)
@@ -275,7 +278,7 @@ var pos = {
    
    matches.pos = pos;
    matches.attr = attr;
-   attr.pseudo = pseudos;
+   matches.pseudo = pseudos;
    matches.arr= arr;
    
    var prev = matches.next = function( elem ){

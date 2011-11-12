@@ -1,6 +1,4 @@
 var matches = require("./parse_sel");
-
-
 function find( doc, sel, deep ){
     
     if(""+sel === sel) sel = matches.lex( sel );
@@ -22,4 +20,10 @@ function find( doc, sel, deep ){
     
     return res;
 }
+
+find.lex = matches.lex;
+find.pos = matches.pos;
+find.attr = matches.attr;
+find.pseudo = matches.pseudo;
+
 module.exports = find;
