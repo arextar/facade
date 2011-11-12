@@ -5,7 +5,22 @@ function map(a){
 }
 var empty = map(['area', 'base', 'br', 'col', 'command', 'embed', 'hr', 'img', 'input', 'keygen', 'link', 'meta', 'param', 'source', 'track', 'wbr']),
     rawText = map(['script', 'style','textarea', 'title']),
-    selfClosing = map(['li', 'optgroup', 'tr'])
+    closes = {
+      dt: ['dt', 'dd'],
+      dd: ['dt', 'dd'],
+      td: ['td', 'th'],
+      th: ['td', 'th'],
+      rt: ['rt', 'rp'],
+      rp: ['rt', 'rp'],
+      li: ['li'],
+      tr: ['tr'],
+      optgroup: ['optgroup', 'option'],
+      option: ['option'],
+      colgroup: ['colgroup'],
+      tbody: ['thead'],
+      tfoot: ['thead']
+    },
+    closesP=map([ 'address', 'article', 'aside', 'blockquote', 'dir', 'div', 'dl', 'fieldset', 'footer', 'form', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'header', 'hgroup', 'hr', 'menu', 'nav', 'ol', 'p', 'pre', 'section', 'table', 'ul']),
     r_start = /^([^<]*)<([a-z0-9]+)\s*((?:[^"'>\/=](?:\s*=\s*(?:[^ "'=<>`]+|'[^']*'|"[^"]*"))?\s*)*)\s*(\/?)>/i,
     r_end = /^([^<]*)<\/([a-z0-9]+)\s*>/i,
     r_attr = /^\s*([^"'>\/=]+)(?:\s*=\s*(?:([^ "'=<>`]+)|'([^']*)'|"([^"]*)"))?\s*/;
@@ -33,12 +48,23 @@ function parse( str ){
         if(temp[2]){
             tag = temp[2].toLowerCase()
             
-            if(selfClosing[tag] && ~tree.indexOf(tag)){
-                while(t = tree.shift()){
-                    children = children._t.parent;
-                    if(t === tag) break;
+            if(closes[tag]){
+                var x = 0, v, ar=closes[tag];
+                for(; v=ar[x++];){
+                    if(~tree.indexOf(v)){
+                        while(t = tree.shift()){
+                            children = children._t.parent;
+                            if(t === v) break;
+                        }
+                        break;
+                    }
                 }
             }
+            
+            if(closesP[tag] && children._t && children._t.tag === "p"){
+                children = children._t.parent;
+            }
+            
             
             a = children[children.length] = {
                 tag: tag,
