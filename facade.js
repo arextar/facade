@@ -79,6 +79,9 @@ Facade.prototype = {
     render: function(min){
         return build(min? minify(this.doc) : this.doc);
     },
+    doctype: function(){
+        return this.doc.doctype;
+    },
     find: function(sel){
         return new Facade(find(this.doc, sel));
     },
@@ -141,5 +144,8 @@ Facade.prototype = {
         return this;
     }
 }
+
+
+facade.find = find;
 
 module.exports = facade;

@@ -18,6 +18,8 @@ function find( doc, sel, deep ){
         }
     }
     
+    res.doctype = doc.doctype;
+    
     return res;
 }
 
