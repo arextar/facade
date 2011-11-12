@@ -248,8 +248,7 @@ function indexOf(nodeList, elem){
    }
    
    var matches = module.exports = function(elem, sel){
-    return sel.some(function(sel){
-        
+    return elem&&sel.some(function(sel){
         if(
            (sel.t && sel.t !== "*" && elem.tag.toUpperCase() !== sel.t)
         || (sel.i && elem.attr.id !== sel.i)) return false;
@@ -283,6 +282,7 @@ function indexOf(nodeList, elem){
                 if(!pseudos[v[0]]( elem, v[1] )) return false;
             }
         }
+        
         
         if((sel[" "] && !pos[" "](elem, sel[" "]))
         || (sel[">"] && !pos[">"](elem, sel[">"]))
