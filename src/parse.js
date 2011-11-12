@@ -5,6 +5,7 @@ function map(a){
 }
 var empty = map(['area', 'base', 'br', 'col', 'command', 'embed', 'hr', 'img', 'input', 'keygen', 'link', 'meta', 'param', 'source', 'track', 'wbr']),
     rawText = map(['script', 'style','textarea', 'title']),
+    selfClosing = map(['li', 'optgroup', 'tr'])
     r_start = /^([^<]*)<([a-z0-9]+)\s*((?:[^"'>\/=](?:\s*=\s*(?:[^ "'=<>`]+|'[^']*'|"[^"]*"))?\s*)*)\s*(\/?)>/i,
     r_end = /^([^<]*)<\/([a-z0-9]+)\s*>/i,
     r_attr = /^\s*([^"'>\/=]+)(?:\s*=\s*(?:([^ "'=<>`]+)|'([^']*)'|"([^"]*)"))?\s*/;
@@ -30,16 +31,24 @@ function parse( str ){
             children[children.length] = temp[1];
         }
         if(temp[2]){
+            tag = temp[2].toLowerCase()
+            
+            if(selfClosing[tag] && ~tree.indexOf(tag)){
+                while(t = tree.shift()){
+                    children = children._t.parent;
+                    if(t === tag) break;
+                }
+            }
             
             a = children[children.length] = {
-                tag: tag = temp[2].toLowerCase(),
+                tag: tag,
                 attr: parse_attr( temp[3] ),
                 parent: children,
                 children:[]
             }
-
+            
             if(!temp[4] && !empty[temp[2]]){
-                tree.unshift( a.tag );
+                tree.unshift( tag );
                 (children = a.children)._t = a;
             }
             
