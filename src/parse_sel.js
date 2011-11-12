@@ -1,19 +1,4 @@
-function indexOf(nodeList, elem){
-      for(var x = 0, e, offset = 0; e = nodeList[x]; x++){
-         
-         if(e.nodeType != 1){
-            offset++;
-         }
-         else if(e === elem) return x - offset;
-      }
-   }
-   
-   function prev( elem ){
-    var p = elem.parent;
-    return p[p.indexOf(elem) - 1]
-   }
-   
-   var pos = {
+var pos = {
       ">": function(elem, sel, context, p){
          
          if(sel[">"]===1){
@@ -124,14 +109,6 @@ function indexOf(nodeList, elem){
     r_not_digit=/\D/,
     r_strip = /\s*(\W)\s*/g,
     r_nth = /([-+]?)(\d*)n\s*([-+])\s*(\d+)/;
-   
-   function test_attr(elem, a, op, val){
-      a = attr_map[a] || a;
-      if(elem[a] !== null){
-         return attr[op]( elem[a], val );
-      }
-      return attr[op]( elem.getAttribute(a), val );
-   }
    
    function lex( sel ){
    
@@ -294,4 +271,14 @@ function indexOf(nodeList, elem){
     })
    }
    
-   module.exports.lex = lex;
+   matches.lex = lex;
+   
+   matches.pos = pos;
+   matches.attr = attr;
+   attr.pseudo = pseudos;
+   matches.arr= arr;
+   
+   var prev = matches.next = function( elem ){
+      var p = elem.parent;
+            return p[p.indexOf(elem) - 1]
+      }
