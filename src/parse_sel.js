@@ -268,7 +268,11 @@ function indexOf(nodeList, elem){
             l = c.length;
             while(l--){
                 v = c[l];
-                if(!attr[v[1]](elem.attr[v[0]], v[2])) return false;
+                if(
+                   v[1]?
+                        !attr[v[1]](elem.attr[v[0]], v[2])
+                  : !elem.attr[v[0]]
+                  ) return false;
             }
         }
         
