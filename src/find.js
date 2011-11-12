@@ -1,11 +1,12 @@
-function matches( tag, sel ){
-    return sel.toLowerCase() == tag.tag;
-}
+var matches = require("./parse_sel");
+
 
 function find( doc, sel, deep ){
     
+    if(""+sel === sel) sel = matches.lex( sel );
+    
     for(var x = 0 ,v, res = []; v=doc[x++];){
-        if( matches(v, sel) ){
+        if( v.tag && matches(v, sel) ){
             res.push(v);
             if(deep && v.children){
                 [].push.apply(res, find(v.children, sel, true));
@@ -18,5 +19,4 @@ function find( doc, sel, deep ){
     }
     return res;
 }
-
 module.exports = find;

@@ -4,10 +4,9 @@ function map(a){
     return ret;
 }
 var empty = map(['area', 'base', 'br', 'col', 'command', 'embed', 'hr', 'img', 'input', 'keygen', 'link', 'meta', 'param', 'source', 'track', 'wbr']),
-    rawText = map(['script', 'style']),
-    rcdata = map(['textarea', 'title']),
-    r_start = /^([^<]*)<([a-z0-9]+)\s*((?:[^"'>\/=](?:\s*=\s*(?:[^ "'=<>`]+|'[^']*'|"[^"]*"))?\s*)*)\s*(\/?)>/,
-    r_end = /^([^<]*)<\/([a-z0-9]+)\s*>/
+    rawText = map(['script', 'style','textarea', 'title']),
+    r_start = /^([^<]*)<([a-z0-9]+)\s*((?:[^"'>\/=](?:\s*=\s*(?:[^ "'=<>`]+|'[^']*'|"[^"]*"))?\s*)*)\s*(\/?)>/i,
+    r_end = /^([^<]*)<\/([a-z0-9]+)\s*>/i,
     r_attr = /^\s*([^"'>\/=]+)(?:\s*=\s*(?:([^ "'=<>`]+)|'([^']*)'|"([^"]*)"))?\s*/;
 
 function parse_attr( str ){
@@ -22,7 +21,7 @@ function parse_attr( str ){
 }
 
 function parse( str ){
-    var children, base = children = [], tree = [], temp, a;
+    var children, base = children = [], tree = [], temp, a, tag;
     
     while(temp = r_start.exec(str)){
         str = str.slice(temp[0].length);
@@ -33,7 +32,7 @@ function parse( str ){
         if(temp[2]){
             
             a = children[children.length] = {
-                tag: temp[2].toLowerCase(),
+                tag: tag = temp[2].toLowerCase(),
                 attr: parse_attr( temp[3] ),
                 parent: children
             }
@@ -42,6 +41,15 @@ function parse( str ){
                 tree.unshift( a.tag );
                 a.children = [];
                 (children = a.children)._t = a;
+            }
+            
+            if(rawText[tag]){
+                
+                a=str.match("<\/"+tag+"\\s*>");
+                
+                children[children.length] = str.slice(0, a.index);
+                
+                str=str.slice(a.index+a[0].length)
             }
         }
         
