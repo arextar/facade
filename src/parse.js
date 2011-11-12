@@ -23,7 +23,8 @@ var empty = map(['area', 'base', 'br', 'col', 'command', 'embed', 'hr', 'img', '
     closesP=map([ 'address', 'article', 'aside', 'blockquote', 'dir', 'div', 'dl', 'fieldset', 'footer', 'form', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'header', 'hgroup', 'hr', 'menu', 'nav', 'ol', 'p', 'pre', 'section', 'table', 'ul']),
     r_start = /^([^<]*)<([a-z0-9]+)\s*((?:[^"'>\/=](?:\s*=\s*(?:[^ "'=<>`]+|'[^']*'|"[^"]*"))?\s*)*)\s*(\/?)>/i,
     r_end = /^([^<]*)<\/([a-z0-9]+)\s*>/i,
-    r_attr = /^\s*([^"'>\/=]+)(?:\s*=\s*(?:([^ "'=<>`]+)|'([^']*)'|"([^"]*)"))?\s*/;
+    r_attr = /^\s*([^"'>\/=]+)(?:\s*=\s*(?:([^ "'=<>`]+)|'([^']*)'|"([^"]*)"))?\s*/,
+    r_doctype = /^\s*<!DOCTYPE +(html(?: +system +(?:"about:legacy-compat"|'about:legacy-compat')| +public +['"]\-\/\/W3C\/\/DTD X?HTML (?:4|1)\.(?:0|1|01)(?: Strict)?\/\/EN['"](?: +['"]http:\/\/www\.w3\.org\/TR\/(?:REC-html40\/strict|html4\/strict|xhtml1\/DTD\/xhtml1\-strict|xhtml11\/DTD\/xhtml11)\.dtd['"])?)?)>/i;
 
 function parse_attr( str ){
     if(!str) return {};
@@ -37,7 +38,12 @@ function parse_attr( str ){
 }
 
 function parse( str ){
-    var children, base = children = [], tree = [], temp, a, tag;
+    var children, base = children = [], tree = [], temp, a, tag, doctype;
+    
+    if(doctype = r_doctype.exec(str)){
+        str=str.slice(doctype[0].length);
+        base.doctype = str[1];
+    }
     
     while(temp = r_start.exec(str)){
         str = str.slice(temp[0].length);
