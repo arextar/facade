@@ -84,7 +84,7 @@ function parse( str ){
                 (children = a.children)._t = a;
             }
             
-            if(rawText[tag]){
+            if(rawText[tag] && !temp[4]){
                 
                 a=str.match("<\/"+tag+"\\s*>");
                 
