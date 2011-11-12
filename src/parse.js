@@ -17,8 +17,8 @@ var empty = map(['area', 'base', 'br', 'col', 'command', 'embed', 'hr', 'img', '
       optgroup: ['optgroup', 'option'],
       option: ['option'],
       colgroup: ['colgroup'],
-      tbody: ['thead'],
-      tfoot: ['thead']
+      tbody: ['thead', 'tbody', 'tfoot'],
+      tfoot: ['thead', 'tbody']
     },
     closesP=map([ 'address', 'article', 'aside', 'blockquote', 'dir', 'div', 'dl', 'fieldset', 'footer', 'form', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'header', 'hgroup', 'hr', 'menu', 'nav', 'ol', 'p', 'pre', 'section', 'table', 'ul']),
     r_start = /^([^<]*)<([a-z0-9]+)\s*((?:[^"'>\/=](?:\s*=\s*(?:[^ "'=<>`]+|'[^']*'|"[^"]*"))?\s*)*)\s*(\/?)>/i,
@@ -67,8 +67,11 @@ function parse( str ){
                 }
             }
             
-            if(closesP[tag] && children._t && children._t.tag === "p"){
-                children = children._t.parent;
+            if(closesP[tag] && ~tree.indexOf('p')){
+                while(t=tree.shift()){
+                    children = children._t.parent;
+                    if(t === "p") break;
+                }
             }
             
             
