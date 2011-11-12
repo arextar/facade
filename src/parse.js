@@ -34,12 +34,12 @@ function parse( str ){
             a = children[children.length] = {
                 tag: tag = temp[2].toLowerCase(),
                 attr: parse_attr( temp[3] ),
-                parent: children
+                parent: children,
+                children:[]
             }
 
             if(!temp[4] && !empty[temp[2]]){
                 tree.unshift( a.tag );
-                a.children = [];
                 (children = a.children)._t = a;
             }
             
