@@ -1,3 +1,5 @@
+var traversal = require("./traversal");
+
 var pos = {
       ">": function(elem, sel, context, p){
          
@@ -8,10 +10,10 @@ var pos = {
          return (p = elem.parent._t) && matches(p, sel);
       },
       "+": function(elem, sel){
-        return matches( prev(elem), sel);
+        return matches( traversal.prev(elem), sel);
       },
       "~": function(elem, sel){
-         while( elem = prev(elem) ){
+         while( elem = traversal.prev(elem) ){
             if(matches( elem, sel)){
                return 1;
             }
@@ -56,15 +58,15 @@ var pos = {
    },
    pseudos = {
       "first-child":function(elem){
-         return elem.parent[0] === elem;
+         return traversal.first(elem.parent) === elem;
       },
       "last-child":function(elem){
-         return elem.parent[elem.parent.length-1] === elem;
+         return traversal.last(elem.parent) === elem;
       },
       "nth-child":function(elem, n){
          if(elem.parent){
             var children = elem.parent, group, offset,
-            ind= children.indexOf(elem);
+            ind= traversal.index(children, elem);
             
             if(n == "odd"){
                return  !ind || !(ind % 2);
@@ -73,7 +75,7 @@ var pos = {
                return ind % 2;
             }
             else if(!r_not_digit.test(n)){
-               return ind == n - 1;
+               return ind === n - 1;
             }
             else if(n.slice( -1 ) == "n" && !r_not_digit.test(n.slice(0, -1))){
                return !((ind + 1) % +n.slice(0, -1));
@@ -83,13 +85,112 @@ var pos = {
                n=r_nth.exec(n);
                
                group = +(n[1]+(n[2]||1))
-               offset = n[3]=="-"? group - +n[4] : +n[4];
+               offset = n[3]=="-"? group - n[4] : +n[4];
                
                var i = ind + 1 - offset;
                
                return !i || !( i % group );
             }
          }
+      },
+      "nth-last-child":function(elem, n){
+         if(elem.parent){
+            var children = elem.parent, group, offset,
+            ind= traversal.lastIndex(children, elem);
+            
+            if(n == "odd"){
+               return  !ind || !(ind % 2);
+            }
+            else if(n == "even"){
+               return ind % 2;
+            }
+            else if(!r_not_digit.test(n)){
+               return ind === n - 1;
+            }
+            else if(n.slice( -1 ) == "n" && !r_not_digit.test(n.slice(0, -1))){
+               return !((ind + 1) % +n.slice(0, -1));
+            }
+            else
+            {
+               n=r_nth.exec(n);
+               
+               group = +(n[1]+(n[2]||1))
+               offset = n[3]=="-"? group - n[4] : +n[4];
+               
+               var i = ind + 1 - offset;
+               
+               return !i || !( i % group );
+            }
+         }
+      },
+      "nth-of-type":function(elem, n){
+         if(elem.parent){
+            var children = elem.parent, group, offset,
+            ind= traversal.index(children, elem, elem.tag);
+            
+            if(n == "odd"){
+               return  !ind || !(ind % 2);
+            }
+            else if(n == "even"){
+               return ind % 2;
+            }
+            else if(!r_not_digit.test(n)){
+               return ind === n - 1;
+            }
+            else if(n.slice( -1 ) == "n" && !r_not_digit.test(n.slice(0, -1))){
+               return !((ind + 1) % +n.slice(0, -1));
+            }
+            else
+            {
+               n=r_nth.exec(n);
+               
+               group = +(n[1]+(n[2]||1))
+               offset = n[3]=="-"? group - n[4] : +n[4];
+               
+               var i = ind + 1 - offset;
+               
+               return !i || !( i % group );
+            }
+         }
+      },
+      "nth-last-of-type":function(elem, n){
+         if(elem.parent){
+            var children = elem.parent, group, offset,
+            ind= traversal.lastIndex(children, elem, elem.tag);
+            
+            if(n == "odd"){
+               return  !ind || !(ind % 2);
+            }
+            else if(n == "even"){
+               return ind % 2;
+            }
+            else if(!r_not_digit.test(n)){
+               return ind === n - 1;
+            }
+            else if(n.slice( -1 ) == "n" && !r_not_digit.test(n.slice(0, -1))){
+               return !((ind + 1) % +n.slice(0, -1));
+            }
+            else
+            {
+               n=r_nth.exec(n);
+               
+               group = +(n[1]+(n[2]||1))
+               offset = n[3]=="-"? group - n[4] : +n[4];
+               
+               var i = ind + 1 - offset;
+               
+               return !i || !( i % group );
+            }
+         }
+      },
+      not: function(elem, sel){
+            return !matches(elem, lex(sel));
+      },
+      "only-child": function(elem){
+            return !traversal.index(elem.parent, elem) && !traversal.lastIndex(elem.parent, elem);
+      },
+      "only-of-type": function(elem){
+            return !traversal.index(elem.parent, elem, elem.tag) && !traversal.lastIndex(elem.parent, elem, elem.tag);
       }
    },
    
@@ -107,7 +208,7 @@ var pos = {
     r_just_id=/^#[-\w]+$/,
     r_not_az=/[^a-z]/,
     r_not_digit=/\D/,
-    r_strip = /\s*(\W)\s*/g,
+    r_strip = /\s*([\+>\~,])\s*/g,
     r_nth = /([-+]?)(\d*)n\s*([-+])\s*(\d+)/;
    
    function lex( sel ){
@@ -179,18 +280,26 @@ var pos = {
          else
          {
             temp=str.join( "" ).slice( 0, l );
-            
-            temp = temp.slice( (l = temp.lastIndexOf( '=' )) + 1 );
-            
-            if(!(attr[i = str[l-1]+"="]&&(l--))){
-               i = '=';
+            if(!/[^-\w]/.test(temp.slice(1))){
+                  if(temp){
+                        str=str.slice(temp.length)
+                        a[al++] = [temp.slice(1)]
+                  }
             }
-            
-            j=str.join( "" ).slice(0, l);
-            
-            j = j.slice( (l = j.lastIndexOf( "[" )) + 1 );
-            
-            a[ al++ ] = [j, i, temp];
+            else
+            {
+                  temp = temp.slice( (l = temp.lastIndexOf( '=' )) + 1 );
+                  
+                  if(!(attr[i = str[l-1]+"="]&&(l--))){
+                     i = '=';
+                  }
+                  
+                  j=str.join( "" ).slice(0, l);
+                  
+                  j = j.slice( (l = j.lastIndexOf( "[" )) + 1 );
+                  
+                  a[ al++ ] = [j, i, temp];
+            }
             
          }
         }
@@ -207,7 +316,7 @@ var pos = {
          }
          ret[c]=lex( temp );
         }
-        else
+        else if(c)
         {
          stack = c + stack;
         }
@@ -250,7 +359,7 @@ var pos = {
                 if(
                    v[1]?
                         !attr[v[1]](elem.attr[v[0]], v[2])
-                  : !elem.attr[v[0]]
+                  : !(v[0] in elem.attr)
                   ) return false;
             }
         }
@@ -280,8 +389,3 @@ var pos = {
    matches.attr = attr;
    matches.pseudo = pseudos;
    matches.arr= arr;
-   
-   var prev = matches.next = function( elem ){
-      var p = elem.parent;
-            return p[p.indexOf(elem) - 1]
-      }
