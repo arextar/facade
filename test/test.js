@@ -90,7 +90,11 @@ var fragments = {
     '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><img />':"<img />",
     '<!DOCTYPE html PUBLIC \'-//W3C//DTD XHTML 1.0 Strict//EN\' "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><img />':"<img />",
     '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" \'http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\'><img />':"<img />",
-    '<!DOCTYPE html PUBLIC \'-//W3C//DTD XHTML 1.0 Strict//EN\' \'http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\'><img />':"<img />"
+    '<!DOCTYPE html PUBLIC \'-//W3C//DTD XHTML 1.0 Strict//EN\' \'http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\'><img />':"<img />",
+    
+    
+    //Parse comments
+    "A <!--<comment>-->...":"A <!--<comment>-->..."
     
 },x, elem, block_elements = [ 'address', 'article', 'aside', 'blockquote', 'dir', 'div', 'dl', 'fieldset', 'footer', 'form', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'header', 'hgroup', 'hr', 'menu', 'nav', 'ol', 'p', 'pre', 'section', 'table', 'ul'],
 closes = [
@@ -116,6 +120,7 @@ closes = [
     'th', 'th'
 ]
 
+var start=+new Date;
 
 //<p> closed by block
 for(x=0; elem = block_elements[x++];){
@@ -136,7 +141,7 @@ for(x in fragments){
 }
 
 unit = "Selection";
-var document = facade("<div>\
+var document = facade("<div id=main>\
 <span class='foo bar'>Hi</span>\
 <b class='foo'>Hello World!</b>\
 <b id='test'>Hola</b>\
@@ -151,9 +156,7 @@ var document = facade("<div>\
 </div>\
 </div>\
 <i foo>Foo</i>\
-<var>a</var>")
-
-
+<var>a</var>");
 
 var selectors = {
     "b": "<b class=foo>Hello World!</b><b id=test>Hola</b>",
@@ -174,10 +177,30 @@ var selectors = {
     "em+strong":"<strong foo=baz>Hi</strong>",
     "strong~strong":"<strong foo=baz>Hi</strong>",
     "var:first-child":"<var>Hi</var>",
-    "span:nth-child(odd)":"<span class='foo bar'>Hi</span><span><var>Hi</var></span>",
-    "b:nth-child(even)":"<b class=foo>Hello World!</b>",
     "var:last-child":"<var>Hi</var><var>a</var>",
-    "div>*":"<span class='foo bar'>Hi</span><b class=foo>Hello World!</b><b id=test>Hola</b><strong>Hola</strong><em foo=bar>Hi</em><strong foo=baz>Hi</strong><var foo=fez>Fezzes are cool</var><div><span><var>Hi</var></span></div>"
+    "div>*":"<span class='foo bar'>Hi</span><b class=foo>Hello World!</b><b id=test>Hola</b><strong>Hola</strong><em foo=bar>Hi</em><strong foo=baz>Hi</strong><var foo=fez>Fezzes are cool</var><div><span><var>Hi</var></span></div>",
+    "#main>:first-child":"<span class='foo bar'>Hi</span>",
+    "#main>:last-child":"<div><span><var>Hi</var></span></div>",
+    "#main>:nth-child(2)":"<b class=foo>Hello World!</b>",
+    "#main>:nth-child(even)":"<b class=foo>Hello World!</b><strong>Hola</strong><strong foo=baz>Hi</strong><div><span><var>Hi</var></span></div>",
+    "#main>:nth-child(odd)":"<span class='foo bar'>Hi</span><b id=test>Hola</b><em foo=bar>Hi</em><var foo=fez>Fezzes are cool</var>",
+    "#main>:nth-child(3n)":"<b id=test>Hola</b><strong foo=baz>Hi</strong>",
+    "#main>:nth-child(3n+1)":"<span class='foo bar'>Hi</span><strong>Hola</strong><var foo=fez>Fezzes are cool</var>",
+    "#main>:nth-last-child(2)":"<var foo=fez>Fezzes are cool</var>",
+    "#main>:nth-last-child(odd)":"<b class=foo>Hello World!</b><strong>Hola</strong><strong foo=baz>Hi</strong><div><span><var>Hi</var></span></div>",
+    "#main>:nth-last-child(even)":"<span class='foo bar'>Hi</span><b id=test>Hola</b><em foo=bar>Hi</em><var foo=fez>Fezzes are cool</var>",
+    "#main>:nth-last-child(3n)":"<b id=test>Hola</b><strong foo=baz>Hi</strong>",
+    "#main>:nth-last-child(3n+1)":"<b class=foo>Hello World!</b><em foo=bar>Hi</em><div><span><var>Hi</var></span></div>",
+    "#main>:nth-of-type(2)":"<b id=test>Hola</b><strong foo=baz>Hi</strong>",
+    "#main>:nth-of-type(even)":"<b id=test>Hola</b><strong foo=baz>Hi</strong>",
+    "#main>:nth-of-type(odd)":"<span class='foo bar'>Hi</span><b class=foo>Hello World!</b><strong>Hola</strong><em foo=bar>Hi</em><var foo=fez>Fezzes are cool</var><div><span><var>Hi</var></span></div>",
+    "#main>:nth-last-of-type(2)":"<b class=foo>Hello World!</b><strong>Hola</strong>",
+    "#main>:nth-last-of-type(odd)":"<span class='foo bar'>Hi</span><b id=test>Hola</b><em foo=bar>Hi</em><strong foo=baz>Hi</strong><var foo=fez>Fezzes are cool</var><div><span><var>Hi</var></span></div>",
+    "#main>:nth-last-of-type(even)":"<b class=foo>Hello World!</b><strong>Hola</strong>",
+    "#main :not(b)":"<span class='foo bar'>Hi</span><strong>Hola</strong><em foo=bar>Hi</em><strong foo=baz>Hi</strong><var foo=fez>Fezzes are cool</var><div><span><var>Hi</var></span></div>",
+    "#main>:not(:nth-child(even))":"<span class='foo bar'>Hi</span><b id=test>Hola</b><em foo=bar>Hi</em><var foo=fez>Fezzes are cool</var>",
+    "var:only-child":"<var>Hi</var>",
+    "span:only-of-type":"<span class='foo bar'>Hi</span><span><var>Hi</var></span>"
 }
 
 for(x in selectors){
@@ -238,3 +261,8 @@ eq(
     "<div><b foo=bar>Hi</b></div>",
     "set attribute"
 );
+
+console.log(
+    "Tests completed in",
+    +new Date - start +"ms"
+)
