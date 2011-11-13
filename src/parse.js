@@ -24,6 +24,7 @@ var empty = map(['area', 'base', 'br', 'col', 'command', 'embed', 'hr', 'img', '
     r_start = /^([^<]*)<([a-z0-9]+)\s*((?:[^"'>\/=](?:\s*=\s*(?:[^ "'=<>`]+|'[^']*'|"[^"]*"))?\s*)*)\s*(\/?)>/i,
     r_end = /^([^<]*)<\/([a-z0-9]+)\s*>/i,
     r_attr = /^\s*([^"'>\/=]+)(?:\s*=\s*(?:([^ "'=<>`]+)|'([^']*)'|"([^"]*)"))?\s*/,
+    r_comment = /<!--/,
     r_doctype = /^\s*<!DOCTYPE +(html(?: +system +(?:"about:legacy-compat"|'about:legacy-compat')| +public +['"]\-\/\/W3C\/\/DTD X?HTML (?:4|1)\.(?:0|1|01)(?: Strict)?\/\/EN['"](?: +['"]http:\/\/www\.w3\.org\/TR\/(?:REC-html40\/strict|html4\/strict|xhtml1\/DTD\/xhtml1\-strict|xhtml11\/DTD\/xhtml11)\.dtd['"])?)?)>/i;
 
 function parse_attr( str ){
@@ -95,6 +96,13 @@ function parse( str ){
                 
                 str=str.slice(a.index+a[0].length)
             }
+        }
+        
+        if(r_comment.test(str)){
+            str=str.slice(4);
+            a=str.match("-->");
+            children[children.length]={comment:str.slice(0, a.index)}
+            str=str.slice(a.index+3);
         }
         
         while(temp = r_end.exec(str)){

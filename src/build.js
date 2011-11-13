@@ -23,7 +23,7 @@ function build(tag){
 var buildList = module.exports = function( list ){
     var x = 0, v, str = "";
     for(; v = list[x++];){
-        str += v.tag? build(v) : v;
+        str += v.tag? build(v) : v.comment? "<!--"+v.comment+"-->" : v;
     }
     return str;
 }

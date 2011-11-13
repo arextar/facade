@@ -15,8 +15,8 @@ function minify_group( str ){
     for(;v=str[x++];){
         if(typeof v == "string"){
             
-            while(typeof str[x] == "string"){
-                v+=str[x++];
+            while(typeof str[x] == "string" || str[x].comment){
+                if(typeof str[x] == "string") v+=str[x++];
             }
             
             v=v.replace(/^\s+$/,"").replace(/^\n|\n$/g,"").replace(/ +/g," ");
@@ -24,7 +24,7 @@ function minify_group( str ){
                 ret[c++] = v;
             }
         }
-        else
+        else if(!v.comment)
         {
             ret[c++] = minify(v);
         }
