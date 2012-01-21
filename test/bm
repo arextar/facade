@@ -1,0 +1,28 @@
+#!/usr/bin/env node
+var times = 500, fs = require('fs');
+var facade = require("../src/facade");
+fs.readFile(__dirname + '/file.html', 'utf8', function(err, txt){
+   var parser = facade.parse(txt);
+   console.log("Benchmarking parsing of a " + (0 | txt.length / 1000) + "kB file");
+   
+   var i = times;
+   //Warmup
+   while(i--) [1][0];
+   i = times;
+   var start = +new Date;
+   while(i--) parser.render();
+   console.log((new Date - start) / times + "ms");
+   
+   console.log("Benchmarking parsing of a " + (0 | txt.length / 1000) + "kB file with a ton of listeners (this could take a while)");
+   i = 100;
+   while(i--){
+      parser.before("div", "This is a div:");
+      parser.first("div", "welcome to the div");
+      parser.last("div", "now leaving the div");
+      parser.after("div", "...that was a div");
+   }
+   i = times;
+   var start = +new Date;
+   while(i--) parser.render();
+   console.log((new Date - start) / times + "ms");
+});

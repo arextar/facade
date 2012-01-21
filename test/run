@@ -1,0 +1,99 @@
+#!/usr/bin/env node
+require("colors");
+var util = require("util");
+
+var unit;
+
+function assert(pass, message){
+    console.log(
+        ((pass? "✓" : "×").bold+" "+unit+":\t"+message)[pass? "green" : "red"]
+    )
+}
+
+function eq( result, expected, msg ){
+    var pass = result === expected;
+    assert(
+        pass,
+        pass? msg : msg+"\n\t\texpected:"+expected+"\n\t\trecieved:"+result
+    )
+}
+
+var facade = require("../src/facade");
+
+unit = "Parsing";
+
+
+
+var fragments = require("./fragments");
+
+
+for(x in fragments){
+    eq(
+        facade.parse(x).render(), fragments[x], x
+    )
+}
+
+/*unit = "Selection";
+var sel = require("./selectors"),
+selectors = sel.s,
+document = sel.d;
+
+
+for(x in selectors){
+    eq(
+        document.find(x).render(),
+        selectors[x],
+        x
+    )
+}*/
+
+
+unit = "Manipulation";
+
+eq(
+    facade.parse("<div><b>Hi</b></div>").replace("b", "<strong>Hola</strong>").render(),
+    "<div><strong>Hola</strong></div>",
+    "replace"
+);
+
+eq(
+    facade.parse("<div><b>Hi</b></div>").before("b", "<strong>Hola</strong>").render(),
+    "<div><strong>Hola</strong><b>Hi</b></div>",
+    "before"
+);
+
+eq(
+    facade.parse("<div><b>Hi</b></div>").after("b", "<strong>Hola</strong>").render(),
+    "<div><b>Hi</b><strong>Hola</strong></div>",
+    "after"
+);
+
+eq(
+    facade.parse("<div><b>Hi</b></div>").last("b", "<strong>Hola</strong>").render(),
+    "<div><b>Hi<strong>Hola</strong></b></div>",
+    "append"
+);
+
+eq(
+    facade.parse("<div><b>Hi</b></div>").first("b", "<strong>Hola</strong>").render(),
+    "<div><b><strong>Hola</strong>Hi</b></div>",
+    "prepend"
+);
+
+eq(
+    facade.parse("<div><b>Hi</b></div>").attr("b", "disabled", true).render(),
+    "<div><b disabled>Hi</b></div>",
+    "add attribute"
+);
+
+eq(
+    facade.parse("<div><b foo=bar>Hi</b></div>").attr("b", "foo", false).render(),
+    "<div><b>Hi</b></div>",
+    "remove attribute"
+);
+
+eq(
+    facade.parse("<div><b>Hi</b></div>").attr("b", "foo", "bar").render(),
+    "<div><b foo=bar>Hi</b></div>",
+    "set attribute"
+);

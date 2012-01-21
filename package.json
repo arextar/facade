@@ -1,0 +1,19 @@
+{
+  "author": "Alex Wilson <arexkun11@gmail.com>",
+  "name": "Facade",
+  "description": "Manipulate HTML server-side in Node using CSS selectors",
+  "version": "0.1.0",
+  "repository": {
+    "url": ""
+  },
+  "main": "src/facade.js",
+  "scripts": {
+    "test": "test/run",
+    "bm": "test/bm"
+  },
+  "engines": {
+    "node": "~0.6.1"
+  },
+  "dependencies": {},
+  "devDependencies": {}
+}
